@@ -1,0 +1,13 @@
+/* istanbul ignore next */'use strict';Object.defineProperty(exports, "__esModule", { value: true });var _jsxFileName = '/app/src/components/GlobalFooter/index.js';var /* istanbul ignore next */_react = require('react'); /* istanbul ignore next */var _react2 = _interopRequireDefault(_react);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+class GlobalFooter extends /* istanbul ignore next */_react.Component {/* istanbul ignore next */constructor(...args) {var _temp;return _temp = super(...args), this.
+
+    render = () =>
+    /* istanbul ignore next */_react2.default.createElement( /* istanbul ignore next */'footer', /* istanbul ignore next */{ __source: { fileName: _jsxFileName, lineNumber: 6 }, __self: this }, /* istanbul ignore next */'(c) Copyleft'), _temp;}} /* istanbul ignore next */exports.default =
+
+
+
+
+
+
+GlobalFooter;

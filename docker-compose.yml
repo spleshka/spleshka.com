@@ -1,0 +1,96 @@
+version: '2'
+services:
+
+  ##########################
+  ### REACTJS ##############
+  ##########################
+
+  frontend:
+    image: node:7.5.0-alpine
+    environment:
+      VIRTUAL_HOST: spleshka.local
+    ports:
+      - "3000:3000"
+    working_dir: /app
+    volumes:
+      - ./reactjs:/app
+    #  - /app/node_modules
+    command: ['npm', 'start']
+
+  ##########################
+  ### DRUPAL ###############
+  ##########################
+
+  # Here we use almost out of the box docker4drupal configuration.
+  # So you can refer to their documentation for configuration.
+  # You can add more containers for memcached, redis, varnish, solr, etc
+  # using pre-built docker images.
+  # https://github.com/wodby/docker4drupal/blob/master/docker-compose.yml
+
+  backend_php:
+    image: wodby/drupal-php:7.1
+    environment:
+      PHP_SITE_NAME: dev
+      PHP_HOST_NAME: localhost
+      PHP_DOCROOT: web
+      PHP_SENDMAIL_PATH: /usr/sbin/sendmail -t -i -S backend_mailhog:1025
+      # PHP_XDEBUG_ENABLED: 1
+      # PHP_XDEBUG_AUTOSTART: 1
+      # PHP_XDEBUG_REMOTE_CONNECT_BACK: 0         # This is needed to respect remote.host setting bellow
+      # PHP_XDEBUG_REMOTE_HOST: "10.254.254.254"  # You will also need to 'sudo ifconfig lo0 alias 10.254.254.254'
+    volumes:
+      - ./drupal:/var/www/html
+      # - d4d-unison-sync:/var/www/html:rw # Replace volume to this to use docker-sync for macOS users
+
+  backend_mariadb:
+    image: wodby/drupal-mariadb:1.0.0
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
+      MYSQL_DATABASE: drupal
+      MYSQL_USER: drupal
+      MYSQL_PASSWORD: drupal
+
+  backend_nginx:
+    image: wodby/drupal-nginx:1.10-1.1.0
+    environment:
+      NGINX_SERVER_NAME: localhost
+      NGINX_UPSTREAM_NAME: backend_php
+      NGINX_DOCROOT: web
+      DRUPAL_VERSION: 8
+      VIRTUAL_HOST: api.spleshka.local
+    volumes_from:
+      - backend_php
+
+  backend_pma:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: backend_mariadb
+      PMA_USER: drupal
+      PMA_PASSWORD: drupal
+      PHP_UPLOAD_MAX_FILESIZE: 1G
+      PHP_MAX_INPUT_VARS: 1G
+      VIRTUAL_HOST: pma.spleshka.local
+    ports:
+     - "8001:80"
+
+  backend_mailhog:
+    image: mailhog/mailhog
+    environment:
+      VIRTUAL_HOST: emails.spleshka.local
+    ports:
+      - "8002:8025"
+
+  ##########################
+  ### NGINX PROXY ##########
+  ##########################
+
+  # This is the image which provides environment variable
+  # VIRTUAL_HOST and makes it possible to use normal host names.
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy:0.5.0
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
