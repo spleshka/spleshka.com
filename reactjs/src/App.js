@@ -1,29 +1,31 @@
-import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
-import { Button } from 'react-bootstrap';
-
-import GlobalFooter from './components/GlobalFooter';
-import GlobalHeader from './components/GlobalHeader';
+import React from 'react';
+import { BrowserRouter, Route, Switch } from 'react-router-dom'
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import muiTheme from './Theme';
+import injectTapEventPlugin from 'react-tap-event-plugin';
+import Header from './components/GlobalElements/Header';
 import FrontPage from './pages/FrontPage';
-import DrupalPage from './pages/DrupalPage';
 import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
 
-class App extends Component {
+// Needed for onTouchTap
+// http://stackoverflow.com/a/34015469/988941
+injectTapEventPlugin();
+
+class App extends React.Component {
   render = () => (
-    <Router>
-      <div>
-        <Button>Test</Button>
-        <GlobalHeader />
-        <Switch>
-          <Route path="/" exact component={FrontPage} />
-          <Route path="/drupal" exact={true} component={DrupalPage} />
-          <Route path="/about" exact={true} component={AboutPage} />
-          <Route component={NotFoundPage} />
-        </Switch>
-        <GlobalFooter />
-      </div>
-    </Router>
+    <BrowserRouter>
+      <MuiThemeProvider muiTheme={muiTheme}>
+        <div>
+          <Header />
+          <Switch>
+            <Route path="/" exact component={FrontPage} />
+            <Route path="/about" exact component={AboutPage} />
+            <Route component={NotFoundPage} />
+          </Switch>
+        </div>
+      </MuiThemeProvider>
+    </BrowserRouter>
   );
 }
 
